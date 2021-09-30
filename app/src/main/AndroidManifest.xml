@@ -19,8 +19,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".PdfFromImageActivity"
+            android:windowSoftInputMode="adjustNothing" />
+        <activity
             android:name="com.pspdfkit.ui.PdfActivity"
             android:windowSoftInputMode="adjustNothing" />
+
     </application>
 
 </manifest>

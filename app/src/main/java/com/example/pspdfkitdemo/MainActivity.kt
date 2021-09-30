@@ -9,12 +9,14 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.pspdfkit.configuration.activity.PdfActivityConfiguration
 import com.pspdfkit.document.processor.*
 import com.pspdfkit.ui.PdfActivity
 import com.pspdfkit.utils.Size
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -28,10 +30,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        openActivityForResult(getImagePickerIntent()!!)
 
-        val intent = Intent(this, PdfFromImageActivity::class.java)
-        openActivityForResult(intent)
+        convert_button.setOnClickListener {
+            Log.d("Main", "hi")
+
+            val intent = Intent()
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+
+            openActivityForResult(intent)
+
+//            val intent = Intent(this, PdfFromImageActivity::class.java)
+//            openActivityForResult(intent)
+        }
 
         /**
          * Deprecated
@@ -109,7 +120,6 @@ class MainActivity : AppCompatActivity() {
         return if (intent.resolveActivity(packageManager) == null) null else Intent.createChooser(intent, "")
     }
 
-
     /**
      * This creates a `PdfProcessorTask` that will create a single-page document using the supplied image as the page background.
      */
@@ -161,6 +171,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openActivityForResult(intent : Intent) {
+        Log.d("Main", "openActivityForResult")
         startForResult.launch(intent)
     }
 
