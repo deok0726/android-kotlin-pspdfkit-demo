@@ -8,6 +8,7 @@ import android.graphics.RectF
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.pspdfkit.configuration.activity.PdfActivityConfiguration
@@ -27,11 +28,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+//        openActivityForResult(getImagePickerIntent()!!)
+
+        val intent = Intent(this, PdfFromImageActivity::class.java)
+        openActivityForResult(intent)
+
+        /**
+         * Deprecated
+         */
+        /*
         if (!waitingForResult) {
             waitingForResult = true
-//            startActivityForResult(getImagePickerIntent(), REQUEST_IMAGE)
-            openActivityForResult(getImagePickerIntent()!!)
+            startActivityForResult(getImagePickerIntent(), REQUEST_IMAGE)
         }
+         */
 
         /**
          * Load PDF file on android
@@ -63,6 +73,10 @@ class MainActivity : AppCompatActivity() {
          */
     }
 
+    /**
+     * Deprecated
+     */
+    /*
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // Once the image is picked and we're done with this activity, close it.
         finish()
@@ -85,6 +99,7 @@ class MainActivity : AppCompatActivity() {
             PdfActivity.showDocument(this, Uri.fromFile(outputPath), PdfActivityConfiguration.Builder(this).build())
         }
     }
+    */
 
     private fun getImagePickerIntent(): Intent? {
         // Creates an intent that will open a file picker with the filter set to only open images.
@@ -93,6 +108,7 @@ class MainActivity : AppCompatActivity() {
         intent.action = Intent.ACTION_GET_CONTENT
         return if (intent.resolveActivity(packageManager) == null) null else Intent.createChooser(intent, "")
     }
+
 
     /**
      * This creates a `PdfProcessorTask` that will create a single-page document using the supplied image as the page background.
@@ -121,14 +137,29 @@ class MainActivity : AppCompatActivity() {
             .build())
     }
 
+    private var imageUri: Uri? = null
+
     private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val intent = result.data
-            // Handle the Intent
-            //do stuff here
+            // Grab the path to the selected image.
+            val imageUri = result.data?.data as Uri
+
+            // Create a `PdfProcessorTask` to create the new PDF.
+            val task = createPdfFromImageTask(imageUri)
+
+            // Obtain a path where we can save the resulting file.
+            // For simplicity we always put it in our application directory.
+            val outputPath = filesDir.resolve("image.pdf")
+
+            // Process the document.
+            PdfProcessor.processDocument(task, outputPath)
+
+            // And finally show it.
+            PdfActivity.showDocument(this, Uri.fromFile(outputPath), PdfActivityConfiguration.Builder(this).build())
         }
     }
+
     private fun openActivityForResult(intent : Intent) {
         startForResult.launch(intent)
     }
